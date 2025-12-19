@@ -281,15 +281,15 @@ function analyzeSalesData(data, options) {
 
    
     // @TODO: Проверка наличия опций
-     if(typeof options === "object"){ //Проверка, что опции — это объект
+     if(typeof options !== "object" || options === null){ //Проверка, что опции — это объект
         throw new Error('Опции должны быть объектом');
      }
 
-     const { calculateRevenue, calculateBonus } = options;
-        if (!someVar || !otherVar) { //Проверка, наличия переменных
+     const {calculateRevenue, calculateBonus } = options;
+        if (!calculateRevenue || !calculateBonus) { //Проверка, наличия переменных
         throw new Error('Чего-то не хватает');
 }
-        if(typeof calculateRevenue === "function"){ //Проверка, что переменные — это функции
+        if(typeof calculateRevenue !== "function" || typeof calculateBonus !== "function"){ //Проверка, что переменные — это функции
         throw new Error('Некорректные переменные:требуется функция');
 }
     // @TODO: Подготовка промежуточных данных для сбора статистики
@@ -303,10 +303,10 @@ function analyzeSalesData(data, options) {
 
     // @TODO: Индексация продавцов и товаров для быстрого доступа
     const sellerIndex = Object.fromEntries(
-        sellers.map(seller => [seller.sellerId, seller])
+        sellerStats.map(seller => [seller.id, seller])
     );
        const productIndex = Object.fromEntries(
-        products.map(product => [product.sku, product])
+        data.products.map(product => [product.sku, product])
     );
    
     // @TODO: Расчёт выручки и прибыли для каждого продавца
@@ -316,49 +316,34 @@ function analyzeSalesData(data, options) {
             if(seller){
                 seller.sales_count += 1;
                 seller.revenue += record.total_amount;
-            }
+            
         record.items.forEach(item => {
             const product = productIndex[item.sku];
             if (product){
                 const cost = product.purchase_price * item.quantity;
                 const revenue = calculateRevenue(item);
                 const profit = revenue - cost;
-                if (seller){
-                    seller.profit += profit;
-                }
+                
+                seller.profit += profit;
+               
                  if (!seller.products_sold[item.sku]) {
                 seller.products_sold[item.sku] = 0;
             }
             seller.products_sold[item.sku] += item.quantity;
             }
-    })
+    });
+    }
     } );
 
- record.items.forEach(item => {
-            const product = productIndex[item.sku];
-            if (product){
-                const cost = product.purchase_price * item.quantity;
-                const revenue = calculateRevenue(item);
-                const profit = revenue - cost;
-                if (seller){
-                    seller.profit += profit;
-                }
-                 if (!seller.products_sold[item.sku]) {
-                seller.products_sold[item.sku] = 0;
-            }
-            seller.products_sold[item.sku] += item.quantity;
-            }
-         
-    })
     // @TODO: Сортировка продавцов по прибыли
     sellerStats.sort((a,b) => b.profit - a.profit); 
-    } 
+    
     // @TODO: Назначение премий на основе ранжирования
     sellerStats.forEach((seller, index) => {
         seller.bonus = calculateBonus (seller, index, sellerStats.length);// Считаем бонус
         seller.top_products = Object.entries(seller.products_sold || {})
         .map(([sku, quantity]) => ({sku, quantity}))// Преобразуем в массив объектов
-        sort((a,b) => b.quantity - a.quantity)//Сортировка по убыванию quantity
+        .sort((a,b) => b.quantity - a.quantity)//Сортировка по убыванию quantity
         .slice(0,10) // Формируем топ-10 товаров
 });
 
@@ -371,4 +356,4 @@ function analyzeSalesData(data, options) {
         sales_count: seller.sales_count || 0, // Целое число, количество продаж продавца
         top_products: seller.top_products, // Массив объектов вида: { "sku": "SKU_008","quantity": 10}, топ-10 товаров продавца
         bonus: (seller.bonus || 0).toFixed(2) // Число с двумя знаками после точки, бонус продавца
-}));
+})) };
