@@ -51,7 +51,7 @@ function analyzeSequence(sequence, tolerance = 0.05) {
 }
 
 
-/**
+/***
  * Вычисление среднего значения
  * @param values
  * @returns {number}
