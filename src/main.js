@@ -257,8 +257,8 @@ function calculateBonusByProfit(index, total, seller) {
         return seller.profit * 0.15;
     } else if (index === 1 || index === 2){
         return seller.profit * 0.10;
-    } else if(index === -1){
-        return 0
+    } else if(index === total - 1){
+        return 0;
     } else {
         return seller.profit * 0.05;
     }
@@ -350,10 +350,10 @@ function analyzeSalesData(data, options) {
     // @TODO: Подготовка итоговой коллекции с нужными полями
     return sellerStats.map(seller => ({
         seller_id: seller.id,// Строка, идентификатор продавца
-        name: `${seller.first_name} $ {seller.last_name}`, // Строка, имя продавца
-        revenue: (seller.revenue || 0).toFixed(2), // Число с двумя знаками после точки, выручка продавца
-        profit: (seller.profit || 0).toFixed(2), // Число с двумя знаками после точки, прибыль продавца
+        name: `{seller.first_name} {seller.last_name}`, // Строка, имя продавца
+        revenue: +(seller.revenue || 0).toFixed(2), // Число с двумя знаками после точки, выручка продавца
+        profit: +(seller.profit || 0).toFixed(2), // Число с двумя знаками после точки, прибыль продавца
         sales_count: seller.sales_count || 0, // Целое число, количество продаж продавца
         top_products: seller.top_products, // Массив объектов вида: { "sku": "SKU_008","quantity": 10}, топ-10 товаров продавца
-        bonus: (seller.bonus || 0).toFixed(2) // Число с двумя знаками после точки, бонус продавца
+        bonus: +(seller.bonus || 0).toFixed(2) // Число с двумя знаками после точки, бонус продавца
 })) };
