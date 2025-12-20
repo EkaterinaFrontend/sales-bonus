@@ -293,17 +293,23 @@ function analyzeSalesData(data, options) {
         throw new Error('Некорректные переменные:требуется функция');
 }
     // @TODO: Подготовка промежуточных данных для сбора статистики
-    const sellerStats = data.sellers.map(sellers => ({
-         sellerId: sellers.id,
-         firstName: sellers.first_name,
-         lastName: sellers.last_name,
-         startDate: sellers.start_date,
-         sellerPosition: sellers.position
-}));
+ const sellerStats = data.sellers.map(seller => ({
+    sellerId: seller.id,
+    firstName: seller.first_name,
+    lastName: seller.last_name,
+    startDate: seller.start_date,
+    sellerPosition: seller.position,
+    revenue: 0,
+    profit: 0,
+    sales_count: 0,
+    products_sold: {},
+    bonus: 0,
+    top_products: []
+}))
 
     // @TODO: Индексация продавцов и товаров для быстрого доступа
-    const sellerIndex = Object.fromEntries(
-        sellerStats.map(seller => [seller.id, seller])
+   const sellerIndex = Object.fromEntries(
+        sellerStats.map(seller => [seller.sellerId, seller])
     );
        const productIndex = Object.fromEntries(
         data.products.map(product => [product.sku, product])
@@ -349,11 +355,12 @@ function analyzeSalesData(data, options) {
 
     // @TODO: Подготовка итоговой коллекции с нужными полями
     return sellerStats.map(seller => ({
-        seller_id: seller.id,// Строка, идентификатор продавца
-        name: `{seller.first_name} {seller.last_name}`, // Строка, имя продавца
-        revenue: +(seller.revenue || 0).toFixed(2), // Число с двумя знаками после точки, выручка продавца
-        profit: +(seller.profit || 0).toFixed(2), // Число с двумя знаками после точки, прибыль продавца
-        sales_count: seller.sales_count || 0, // Целое число, количество продаж продавца
-        top_products: seller.top_products, // Массив объектов вида: { "sku": "SKU_008","quantity": 10}, топ-10 товаров продавца
-        bonus: +(seller.bonus || 0).toFixed(2) // Число с двумя знаками после точки, бонус продавца
-})) };
+        seller_id: seller.sellerId,
+        name: `${seller.firstName} ${seller.lastName}`,
+        revenue: +(seller.revenue || 0).toFixed(2),
+        profit: +(seller.profit || 0).toFixed(2),
+        sales_count: seller.sales_count || 0,
+        top_products: seller.top_products,
+        bonus: +(seller.bonus || 0).toFixed(2)
+    }));
+};
