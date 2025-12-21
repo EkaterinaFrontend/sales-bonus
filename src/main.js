@@ -4,17 +4,12 @@
  * @param _product 
  * @returns {number}
  */
-// function calculateSimpleRevenue(purchase, _product) {
-//    // @TODO: Расчёт прибыли от операции
-//     const {discount, sale_price, quantity} = purchase;
-//        return sale_price * quantity * (1 - discount / 100);
-// }
-
 function calculateSimpleRevenue(purchase, _product) {
-   const {sale_price, quantity} = purchase;
-   
-   return sale_price * quantity; 
+   // @TODO: Расчёт прибыли от операции
+    const {discount, sale_price, quantity} = purchase;
+       return sale_price * quantity * (1 - discount / 100);
 }
+
 /** 
  * @param index порядковый номер в отсортированном массиве
  * @param total общее число продавцов
@@ -92,23 +87,24 @@ function analyzeSalesData(data, options) {
      data.purchase_records.forEach(record => {
         const seller = sellerIndex[record.seller_id];
 
-      
+        if (seller){
+            seller.sales_count += 1;
+            seller.revenue += record.total_amount;
+        }
         record.items.forEach(item => {
             const product = productIndex[item.sku];// товар
 
-            if (seller && product) { 
+            
             const cost = product.purchase_price * item.quantity;// Посчитать себестоимость
             const revenue = calculateRevenue(item, product);
             const profit = revenue - cost;
-            seller.revenue += revenue; 
             seller.profit += profit;
-           
 
-        if (!seller.products_sold[item.sku]) {
+        if (!seller.products_sold[item.sku]) {/////АААААААААА
             seller.products_sold[item.sku] = 0;
 }
             seller.products_sold[item.sku] += item.quantity;
-        }
+
      });
     });
 
